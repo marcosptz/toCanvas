@@ -645,6 +645,25 @@ class Pdf {
 		this.ctx.restore();
 	}
 
+	/**
+	 * Método que cria a visualização de uma nova página
+	 */
+	addPage() {
+		let canvas_clone = this.canvas.cloneNode(true)
+		let canvas_page = document.querySelectorAll('#canvas')
+
+		this.box.appendChild(canvas_clone)
+		this.ctx = document.querySelectorAll('#canvas')[canvas_page.length].getContext('2d');
+	}
+
+	/**
+	 * Método que seta qual página irá desenhar no canvas
+	 * @param {integer} page 
+	 */
+	setPage(page=0) {
+		this.ctx = document.querySelectorAll('#canvas')[page].getContext('2d');
+	}
+
 	/***** Caso seja necessário, adicione aqui os métodos novos *****/
 	/** code... **/
 	/***************************** Fim ******************************/
