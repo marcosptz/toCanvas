@@ -179,7 +179,7 @@ doc.optimizedPrint('Relatório Pesado');
 
 ## 📝 Contribuição
 
-1. Faça o Fork do projeto ([https://github.com/marcosptz/xadrez1](https://github.com/marcosptz/xadrez1))
+1. Faça o Fork do projeto ([https://github.com/marcosptz/toCanvas](https://github.com/marcosptz/toCanvas))
 2. Crie uma Branch para sua Feature (`git checkout -b feature/NovaFeature`)
 3. Commit suas mudanças (`git commit -m 'Add NovaFeature'`)
 4. Push para a Branch (`git push origin feature/NovaFeature`)
