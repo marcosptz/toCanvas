@@ -148,7 +148,24 @@ Método interno chamado pelo `setZoom` que reaplica as regras de CSS para manter
 
 ## 📑 Suporte a Múltiplas Páginas
 
-A biblioteca foi desenhada para que cada elemento com a classe `.canvas` dentro do container principal seja tratado como uma nova página no documento final. O método de impressão insere automaticamente quebras de página (`page-break-after: always`) entre cada um deles.
+A biblioteca foi desenhada para que cada elemento com a classe `.canvas` dentro do container principal seja tratado como uma nova página no documento final. O método de impressão insere automaticamente quebras de página (`page-break-after: always`) entre cada um deles, com o método `addPage` é possivél adicionar uma nova página e escolher qual página quer usar com o método `setPage`.
+
+```javascript
+// Adiciona uma nova página
+doc.addPage();
+
+// Escolhendo qual página será desenhado, passando o 0 como parâmetro para escolher a primeira página
+doc.setPage(0);
+
+```
+
+### 1. `addPage()`
+
+Método que cria a visualização de uma nova página, passando a desenha sempre na nova página criada
+
+### 2. `setPage(page)`
+
+Método que seta qual página irá desenhar no canvas, iniciando no 0 como primeira página
 
 ---
 
