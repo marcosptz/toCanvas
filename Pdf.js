@@ -6,6 +6,7 @@ class Pdf {
 		this.add_class = typeof props.add_class == 'undefined' ? '' : props.add_class;
 		this.overflow_x = typeof props.overflow_x == 'undefined' ? 'auto' : props.overflow_x;
 		this.overflow_y = typeof props.overflow_y == 'undefined' ? 'auto' : props.overflow_y;
+		this.currentZoom = 1.0;
 		this.html = `<div class="box ${this.add_class}" id="box">
 						<canvas class="canvas" id="canvas" width="${this.paper_width}" height="${this.paper_height}">
 							<h3>Seu navegador não tem suporte ao canvas</h3>
@@ -17,23 +18,47 @@ class Pdf {
 		this.element = document.getElementById(element);
 		this.element.innerHTML = this.html;
 		this.box = document.getElementById('box');
-		this.box.style = `width: 100%;
+		/*this.box.style = `width: 100%;
 		                  height: 66vh; 
 						  overflow-x: ${this.overflow_x} !important;
 						  overflow-y: ${this.overflow_y} !important; 
 						  border: solid #363636 2px;
 						  background-color: #696969;
-						`;
+						`;*/
+		// Configuração do Container (A "Mesa de Trabalho")
+		this.box.style.width = '100%';
+		this.box.style.height = '66vh';
+		this.box.style.display = 'flex';
+		this.box.style.flexDirection = 'column';
+		this.box.style.alignItems = 'center'; 
+		this.box.style.padding = '20px';
+		this.box.style.backgroundColor = '#696969';
+		this.box.style.border = 'solid #363636 2px';
 
+		// Forma correta de aplicar !important no JS
+		this.box.style.setProperty('overflow-x', this.overflow_x, 'important');
+		this.box.style.setProperty('overflow-y', this.overflow_y, 'important');
+
+		// Configuração do Canvas (O "Papel")
 		this.canvas = document.getElementById('canvas');
 		this.canvas.style.width = '100%'; 
         this.canvas.style.height = 'auto';
         this.canvas.style.maxWidth = '800px'; // Ajuste conforme sua preferência de UI
-        this.canvas.style.backgroundColor = '#FFFAFA'; 
-        this.canvas.style.border = 'solid #4F4F4F 1px';
+        this.canvas.style.backgroundColor = '#FFFAFA'; // Cor de papel (branco gelo)
+        this.canvas.style.border = 'solid #4F4F4F 1px'; // Borda fina para o papel
+        this.canvas.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)'; // Sombra para dar profundidade
+        this.canvas.style.display = 'block';
+	    this.canvas.style.margin = '10px auto';
+
+	    // Adicionando o Canvas a variável ctx
     	this.ctx = this.canvas.getContext('2d');
+
+    	// Adicionando a escala para os estilos de sublinhados para as linhas
 		this.obj_dotted = [this.scale(1.2), this.scale(1.2)];
 		this.obj_dashed = [this.scale(3.6), this.scale(1.8)];
+
+		// Chama a função para aplicar o tamanho inicial
+		this.updateZoom();
 	}
 
 	/**
@@ -667,6 +692,31 @@ class Pdf {
 		this.ctx = this.box.querySelectorAll('#canvas')[page].getContext('2d');
 	}
 
+	/**
+	 * Altera o nível de zoom
+	 * @param {float} value - Ex: 1.2 para 120%
+	 */
+	setZoom(value) {
+	    this.currentZoom = value;
+	    this.updateZoom();
+	}
+
+	/**
+	 * Atualiza visualmente o tamanho de todos os canvases no container
+	 */
+	updateZoom() {
+	    // Calculamos a largura base em pixels na tela (ex: 210mm convertido)
+	    // Usamos 3.78 como fator de conversão mm -> px para visualização em 96 DPI
+	    const baseWidth = 210 * 3.78; 
+	    const newWidth = baseWidth * this.currentZoom;
+
+	    this.box.querySelectorAll('.canvas').forEach(canv => {
+	    	canv.style.maxWidth = 'none';
+	        canv.style.width = `${newWidth}px`;
+	        canv.style.height = 'auto'; // Mantém a proporção
+	    });
+	}
+
 	/***** Caso seja necessário, adicione aqui os métodos novos *****/
 	/** code... **/
 	/***************************** Fim ******************************/
@@ -760,6 +810,87 @@ class Pdf {
             }, 1000);
         };
     }
+
+    /**
+ * Método que imprime o conteúdo de todos os canvases de forma otimizada
+ * @param {string} title - Define o título do documento
+ */
+	async optimizedPrint(title = '') {
+	    const canvases = this.box.querySelectorAll('.canvas');
+	    if (canvases.length === 0) return;
+
+	    // 1. Convertemos cada canvas em um Blob URL de forma assíncrona
+	    // O Promise.all garante que só seguiremos adiante quando todas as páginas estiverem prontas
+	    const imagesToPrint = await Promise.all(
+	        Array.from(canvases).map(canvas => {
+	            return new Promise(resolve => {
+	                canvas.toBlob(blob => {
+	                    // Cria um link temporário para o arquivo binário na memória
+	                    const url = URL.createObjectURL(blob);
+	                    resolve(url);
+	                }, 'image/png');
+	            });
+	        })
+	    );
+
+	    // 2. Criamos o iframe oculto (como já vínhamos fazendo)
+	    const iframe = document.createElement('iframe');
+	    Object.assign(iframe.style, {
+	        position: 'fixed',
+	        right: '0',
+	        bottom: '0',
+	        width: '0',
+	        height: '0',
+	        border: 'none',
+	        visibility: 'hidden'
+	    });
+	    document.body.appendChild(iframe);
+
+	    const doc = iframe.contentWindow.document;
+
+	    // 3. Montamos o HTML com o CSS de alta resolução
+	    let html = `
+	        <html>
+	        <head>
+	            <title>${title}</title>
+	            <style>
+	                @page { margin: 0; size: A4 portrait; }
+	                body { margin: 0; padding: 0; background: white; }
+	                img { 
+	                    display: block;
+	                    width: 210mm; 
+	                    height: 297mm;
+	                    page-break-after: always;
+	                    image-rendering: auto;
+	                }
+	                img:last-child { page-break-after: avoid; }
+	            </style>
+	        </head>
+	        <body>`;
+
+	    imagesToPrint.forEach(src => {
+	        html += `<img src="${src}"/>`;
+	    });
+
+	    html += `</body></html>`;
+
+	    doc.open();
+	    doc.write(html);
+	    doc.close();
+
+	    // 4. Disparo da impressão
+	    iframe.contentWindow.onload = () => {
+	        iframe.contentWindow.focus();
+	        iframe.contentWindow.print();
+	        
+	        // 5. LIMPEZA DE MEMÓRIA (Muito importante com Blobs!)
+	        // Removemos o iframe e liberamos os URLs temporários
+	        setTimeout(() => {
+	            imagesToPrint.forEach(url => URL.revokeObjectURL(url));
+	            document.body.removeChild(iframe);
+	        }, 1000);
+	    };
+	}
 
 	/**
 	 * Método que limpa a área do canvas
