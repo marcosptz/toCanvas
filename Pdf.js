@@ -7,7 +7,7 @@ class Pdf {
 		this.overflow_x = typeof props.overflow_x == 'undefined' ? 'auto' : props.overflow_x;
 		this.overflow_y = typeof props.overflow_y == 'undefined' ? 'auto' : props.overflow_y;
 		this.html = `<div class="box ${this.add_class}" id="box">
-						<canvas class="canvas" id="canvas" width="${this.paper_width}px" height="${this.paper_height}px">
+						<canvas class="canvas" id="canvas" width="${this.paper_width}" height="${this.paper_height}">
 							<h3>Seu navegador não tem suporte ao canvas</h3>
 						</canvas>
 					</div>`;
