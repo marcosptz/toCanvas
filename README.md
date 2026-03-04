@@ -42,6 +42,7 @@ doc.text('Relatório de Vendas', 23, 12, {
     font_weight: 'italic'
 });
 
+// Desenha um retângulo com as bordas arredondadas
 doc.roundedRect(5, 5, 100, 60, {radius: 2, color: '#000000'});
 
 // Desenhar um retângulo (ex: borda de etiqueta)
@@ -56,8 +57,10 @@ doc.circle(10, 40, 2, {fill: true});
 // Desenha um círculo normal
 doc.circle(10, 50, 2);
 
+// Desenha um texto com tamanho da font de 20px e estilo Arial
 doc.text('Vendas à vista', 20, 38, {font_size: 20, font_text: 'Arial'});
 
+// Desenha um texto com tamanho da font de 20px e estilo Arial e o texto não preenchido
 doc.text('Vendas à prazo', 20, 48, {font_size: 20, font_text: 'Arial', fill: false});
 
 // Limpar o canvas atual com o método clear() após 5 segundos
@@ -116,6 +119,13 @@ doc.setZoom(1.5);
 
 // Retornar para o tamanho original (100%)
 doc.setZoom(1.0);
+
+// Retorna o valor atual do zoom
+doc.currentZoom
+
+// Exemplo de uso na interface para um botão de zoom + e -
+doc.setZoom(doc.currentZoom + 0.1);
+doc.setZoom(doc.currentZoom - 0.1);
 
 ```
 
