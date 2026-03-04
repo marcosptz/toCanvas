@@ -1,6 +1,6 @@
 class Pdf {
 	constructor(element, props={}) {
-		this.scl = typeof props.scale == 'undefined' ? 2.42 : props.scale;
+		this.scl = typeof props.scale == 'undefined' ? 11.811 : props.scale;
 		this.paper_width = typeof props.paper_width == 'undefined' ? this.scale(210) : this.scale(props.paper_width);
 		this.paper_height = typeof props.paper_height == 'undefined' ? this.scale(297) : this.scale(props.paper_height);
 		this.add_class = typeof props.add_class == 'undefined' ? '' : props.add_class;
@@ -26,8 +26,11 @@ class Pdf {
 						`;
 
 		this.canvas = document.getElementById('canvas');
-		this.canvas.style = `background-color: #FFFAFA; 
-							 border: solid #4F4F4F 1px;`
+		this.canvas.style.width = '100%'; 
+        this.canvas.style.height = 'auto';
+        this.canvas.style.maxWidth = '800px'; // Ajuste conforme sua preferência de UI
+        this.canvas.style.backgroundColor = '#FFFAFA'; 
+        this.canvas.style.border = 'solid #4F4F4F 1px';
     	this.ctx = this.canvas.getContext('2d');
 		this.obj_dotted = [this.scale(1.2), this.scale(1.2)];
 		this.obj_dashed = [this.scale(3.6), this.scale(1.8)];
@@ -650,10 +653,10 @@ class Pdf {
 	 */
 	addPage() {
 		let canvas_clone = this.canvas.cloneNode(true)
-		let canvas_page = document.querySelectorAll('#canvas')
+		let canvas_page = this.box.querySelectorAll('#canvas')
 
 		this.box.appendChild(canvas_clone)
-		this.ctx = document.querySelectorAll('#canvas')[canvas_page.length].getContext('2d');
+		this.ctx = this.box.querySelectorAll('#canvas')[canvas_page.length].getContext('2d');
 	}
 
 	/**
@@ -661,7 +664,7 @@ class Pdf {
 	 * @param {integer} page 
 	 */
 	setPage(page=0) {
-		this.ctx = document.querySelectorAll('#canvas')[page].getContext('2d');
+		this.ctx = this.box.querySelectorAll('#canvas')[page].getContext('2d');
 	}
 
 	/***** Caso seja necessário, adicione aqui os métodos novos *****/
@@ -681,24 +684,82 @@ class Pdf {
 	 * Método que imprime o conteúdo do canvas
 	 * @param {string} title - Define o título da página de impressão
 	 */
-	print(title='') {
-		let canvas = this.canvas.toDataURL('image/png');
-		let windowContent = '<!DOCTYPE html>';
-		let printWin = window.open('', '', width = 340, height = 260);
+	print(title = '') {
+        const imagesToPrint = [];
+        
+        // 1. Coleta os DataURLs de todos os canvases
+        this.box.querySelectorAll('.canvas').forEach((el) => {
+            imagesToPrint.push(el.toDataURL('image/png'));
+        });
 
-		windowContent += `<head><title>${title}</title></head>`;
-		windowContent += '<body>';
-		windowContent += `<img src="${canvas}"/>`;
-		windowContent += '</body>';
-		windowContent += '</html>';
+        if (imagesToPrint.length === 0) return;
 
-		printWin.document.open();
-		printWin.document.write(windowContent);
-		printWin.document.close();
-		printWin.focus();
+        // 2. Criamos o iframe oculto
+        const iframe = document.createElement('iframe');
+        Object.assign(iframe.style, {
+            position: 'fixed',
+            right: '0',
+            bottom: '0',
+            width: '0',
+            height: '0',
+            border: 'none',
+            visibility: 'hidden'
+        });
+        document.body.appendChild(iframe);
 
-		setTimeout(() => {printWin.print()}, 100)
-	}
+        const doc = iframe.contentWindow.document;
+
+        // 3. HTML e CSS Otimizado
+        let html = `
+            <html>
+            <head>
+                <title>${title}</title>
+                <style>
+                    @page { 
+                        margin: 0; 
+                        size: A4 portrait; /* Ou 'auto' se quiser que a impressora decida */
+                    }
+                    body { 
+                        margin: 0; 
+                        padding: 0; 
+                        background: white;
+                    }
+                    img { 
+                        display: block;
+                        width: 210mm;      /* Define a largura física exata do papel A4 */
+                        height: 297mm;     /* Define a altura física exata do papel A4 */
+                        object-fit: contain; /* Garante que o canvas caiba sem distorcer */
+                        page-break-after: always;
+                        image-rendering: auto; /* Deixe o browser suavizar a escala alta */
+                    }
+                    img:last-child { 
+                        page-break-after: avoid; 
+                    }
+                </style>
+            </head>
+            <body>`;
+
+        imagesToPrint.forEach(src => {
+            html += `<img src="${src}"/>`;
+        });
+
+        html += `</body></html>`;
+
+        doc.open();
+        doc.write(html);
+        doc.close();
+
+        // 4. Disparo garantido após o carregamento
+        iframe.contentWindow.onload = () => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+            
+            // Remove o iframe após um pequeno delay para garantir que o diálogo fechou
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
+        };
+    }
 
 	/**
 	 * Método que limpa a área do canvas
