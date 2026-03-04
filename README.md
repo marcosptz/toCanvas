@@ -1,4 +1,4 @@
-# 📄 JS-PDF Library (Canvas Based)
+# 📄 JS-PDF Library (toCanvas)
 
 Uma biblioteca leve e poderosa em JavaScript para criação de documentos e etiquetas de alta resolução utilizando a API Canvas do HTML5. Ideal para projetos que exigem precisão de layout, como etiquetas térmicas, relatórios técnicos e documentos prontos para impressão.
 
