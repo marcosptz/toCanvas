@@ -1,4 +1,4 @@
-class Pdf {
+class ToCanvas {
 	constructor(element, props={}) {
 		this.scl = typeof props.scale == 'undefined' ? 11.811 : props.scale;
 		this.paper_width = typeof props.paper_width == 'undefined' ? this.scale(210) : this.scale(props.paper_width);

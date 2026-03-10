@@ -16,10 +16,10 @@ Uma biblioteca leve e poderosa em JavaScript para criação de documentos e etiq
 
 ### Instalação e Inicialização
 
-Basta incluir o arquivo `pdf.js` no seu projeto e inicializar a classe apontando para um elemento de container:
+Basta incluir o arquivo `toCanvas.js` no seu projeto e inicializar a classe apontando para um elemento de container:
 
 ```javascript
-const doc = new Pdf('meu-container', {
+const doc = new ToCanvas('meu-container', {
     scale: 11.811,         // Otimizado para 300 DPI
     paper_width: 210,      // Largura em mm (A4)
     paper_height: 297,     // Altura em mm (A4)
