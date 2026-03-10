@@ -13,18 +13,10 @@ class ToCanvas {
 						</canvas>
 					</div>`;
 
-  		document.getElementById(element).innerHTML = this.html;
-
 		this.element = document.getElementById(element);
 		this.element.innerHTML = this.html;
 		this.box = document.getElementById('box');
-		/*this.box.style = `width: 100%;
-		                  height: 66vh; 
-						  overflow-x: ${this.overflow_x} !important;
-						  overflow-y: ${this.overflow_y} !important; 
-						  border: solid #363636 2px;
-						  background-color: #696969;
-						`;*/
+
 		// Configuração do Container (A "Mesa de Trabalho")
 		this.box.style.width = '100%';
 		this.box.style.height = '66vh';
